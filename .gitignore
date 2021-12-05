@@ -1,0 +1,6 @@
+node_modules
+.direnv
+www/js
+wwwP/js
+dist
+.parcel-cache
