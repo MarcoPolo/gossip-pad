@@ -3,6 +3,7 @@ import React, { useState, useCallback, useMemo } from 'react'
 import Caret from "./Caret";
 import randomColor from 'randomcolor';
 import { useHash } from 'react-use'
+import { useSearchParam } from 'react-use'
 import Provider from 'y-libp2p'
 import { Slate, Editable, withReact } from 'slate-react'
 import * as Y from 'yjs'
@@ -12,9 +13,6 @@ import PeerId from 'peer-id'
 import libp2p from './libp2p'
 import {
   Editor,
-  Transforms,
-  Range,
-  Point,
   Text,
   createEditor,
   Element as SlateElement,
@@ -22,11 +20,27 @@ import {
 } from 'slate'
 import { css } from '@emotion/css'
 
-// import { withHistory } from 'slate-history'
-// import { BulletedListElement } from './custom-types'
+const targetMultiAddrsParam = 'targetMultiAddrs';
+const roomParam = 'room';
 
 (function () {
-  Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages.insertBefore("markdown", "prolog", { blockquote: { pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation" }, code: [{ pattern: /^(?: {4}|\t).+/m, alias: "keyword" }, { pattern: /``.+?``|`[^`\n]+`/, alias: "keyword" }], title: [{ pattern: /\w+.*(?:\r?\n|\r)(?:==+|--+)/, alias: "important", inside: { punctuation: /==+$|--+$/ } }, { pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: { punctuation: /^#+|#+$/ } }], hr: { pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation" }, list: { pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation" }, "url-reference": { pattern: /!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/, inside: { variable: { pattern: /^(!?\[)[^\]]+/, lookbehind: !0 }, string: /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/, punctuation: /^[\[\]!:]|[<>]/ }, alias: "url" }, bold: { pattern: /(^|[^\\])(\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/, lookbehind: !0, inside: { punctuation: /^\*|^__|\*$|__$/ } }, italic: { pattern: /(^|[^\\])([_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/, lookbehind: !0, inside: { punctuation: /^[_]|[_]$/ } }, url: { pattern: /!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/, inside: { variable: { pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0 }, string: { pattern: /"(?:\\.|[^"\\])*"(?=\)$)/ } } } }), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold);
+  Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages.insertBefore("markdown", "prolog",
+    {
+      blockquote: { pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation" },
+      code: [
+        { pattern: /^(?: {4}|\t).+/m, alias: "keyword" },
+        { pattern: /`[^`\n]+`/, alias: "keyword" }
+      ],
+      title: [{ pattern: /\w+.*(?:\r?\n|\r)(?:==+|--+)/, alias: "important", inside: { punctuation: /==+$|--+$/ } }, { pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: { punctuation: /^#+|#+$/ } }],
+      hr: { pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation" },
+      list: { pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation" },
+      "url-reference": { pattern: /!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/, inside: { variable: { pattern: /^(!?\[)[^\]]+/, lookbehind: !0 }, string: /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/, punctuation: /^[\[\]!:]|[<>]/ }, alias: "url" },
+      bold: { pattern: /(^|[^\\])(\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/, lookbehind: !0, inside: { punctuation: /^\*|^__|\*$|__$/ } },
+      italic: { pattern: /(^|[^\\])([_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/, lookbehind: !0, inside: { punctuation: /^[_]|[_]$/ } },
+      url: {
+        pattern: /!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/, inside: { variable: { pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0 }, string: { pattern: /"(?:\\.|[^"\\])*"(?=\)$)/ } }
+      }
+    }), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold);
 })();
 
 
@@ -71,154 +85,117 @@ function useLibp2p({ peerId }: { peerId: PeerId | null }) {
   return node
 }
 
-const SHORTCUTS = {
-  '*': 'list-item',
-  '-': 'list-item',
-  '+': 'list-item',
-  '>': 'block-quote',
-  // '#': 'heading-one',
-  // '##': 'heading-two',
-  // '###': 'heading-three',
-  // '####': 'heading-four',
-  // '#####': 'heading-five',
-  // '######': 'heading-six',
-}
 
-const MarkdownShortcutsExample = () => {
+const CollabEditor = () => {
   const node = useLibp2p({ peerId: null })
   const prevNode = usePrevious(node)
+  const [nickName, setNickName] = React.useState("...")
 
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const renderElement = useCallback(props => <Element {...props} />, [])
   const yDoc = React.useMemo(() => {
     return new Y.Doc();
   }, [])
-  const [editor, setEditor] = useState<Editor | null>(null)
-  // const editor = useMemo(
-  //   // () => withShortcuts(withReact(withHistory(createEditor()))),
-  //   () => {
-  //     const editor = withShortcuts(withReact(createEditor() as any))
 
-  //     const sharedType = yDoc.getArray<SyncElement>('content');
-  //     const yjsEditor = withYjs(editor, sharedType);
-  //     toSharedType(sharedType, [
-  //       { type: "paragraph", children: [{ text: "" }] },
-  //     ]);
+  const room: string = useSearchParam(roomParam) || "general";
+  const targetMultiAddrs: string[] = JSON.parse(useSearchParam(targetMultiAddrsParam) || "[]")
 
-  //     return yjsEditor
-  //     // return editor
+  const initialEditor = useMemo(() => {
+    const editor = withReact(createEditor() as any)
+    const sharedType = yDoc.getArray<SyncElement>('content');
+    const yjsEditor = withYjs(editor, sharedType);
+    console.log("shared", sharedType.toJSON())
+    toSharedType(sharedType, [
+      // @ts-ignore
+      { type: "paragraph", children: [{ text: "" }] },
+    ]);
+    return yjsEditor
+  }, [])
 
-  //   },
-  //   []
-  // )
+  const [editor, setEditor] = useState<Editor | null>(initialEditor)
 
+  const [provider, setProvider] = useState<Provider | null>(null)
 
+  // For the input if the user picks another room
+  const [otherRoom, setOtherRoom] = React.useState(room)
+
+  useConnectToMultiAddrs(node, targetMultiAddrs)
 
   const color = useMemo(
     () =>
       randomColor({
+        seed: node?.peerId?.toB58String(),
         luminosity: "dark",
         format: "rgba",
         alpha: 1,
       }),
-    []
+    [node]
   );
 
-  const [topic, setTopicHash] = useHash()
-
-  // const [targetPeerFromHash,] = useHash()
-  // const lastTargetPeer = usePrevious(targetPeerFromHash)
-  // React.useEffect(() => {
-  //   (async () => {
-  //     const retryLimit = 10
-  //     let success = false
-  //     for (let i = 0; i < retryLimit; i++) {
-  //       try {
-  //         if (!!targetPeerFromHash && targetPeerFromHash.length > 1) {
-  //           console.log("targetPeerFromHash", targetPeerFromHash)
-  //           const peerId = PeerId.createFromB58String(targetPeerFromHash.substr(1))
-  //           await node?.dial(peerId)
-  //         }
-  //         success = true
-  //         console.log("success dialed peer")
-  //         break
-  //       } catch (e) {
-  //         console.warn("Failed to dial peer", e)
-  //         await new Promise(resolve => setTimeout(resolve, 1000))
-  //       }
-  //     }
-  //     if (!success) {
-  //       console.error("Failed to dial peer")
-  //     }
-  //   })()
-  // }, [targetPeerFromHash, node])
-
   React.useEffect(() => {
-    console.log("node", node, node?.isStarted())
     if (node === prevNode) {
       return
     }
+    console.log("libp2p node:", node, node?.isStarted())
+
 
     // @ts-ignore
     window.PeerId = PeerId
     if (!!node) {
-      const provider = new Provider(yDoc, node, topic);
+      if (nickName === "...") {
+        setNickName(node.peerId.toB58String())
+      }
+
+      const provider = new Provider(yDoc, node, room);
+
       console.log("setup provider", provider)
-      const editor = withShortcuts(withReact(createEditor() as any))
-
-      const sharedType = yDoc.getArray<SyncElement>('content');
-      const yjsEditor = withYjs(editor, sharedType);
-      toSharedType(sharedType, [
-        { type: "paragraph", children: [{ text: "" }] },
-      ]);
-
-      const cursorEditor = withCursor(yjsEditor, provider.awareness);
-      // provider.awareness.on('update', () => {
-      //   console.log("awareness update")
-      // })
-
       provider.awareness.setLocalState({
         alphaColor: color.slice(0, -2) + "0.2)",
         color,
         name: node.peerId?.toB58String(),
       });
+      setProvider(provider)
+    }
+  }, [node, prevNode, nickName, setNickName])
 
-
-      setEditor(cursorEditor)
-      // return editor
+  const prevProvider = usePrevious(provider)
+  const [userCursorReady, setUserCursorReady] = React.useState(false)
+  // Wait until we have a provider to setup the user cursors
+  React.useEffect(() => {
+    if (prevProvider === provider || !provider) {
+      return
     }
 
-    // node?.on('peer:discovery', (peerId) => {
-    //   console.log(`Found peer ${peerId.toB58String()}`)
-    // })
+    if (editor) {
+      // @ts-ignore
+      setEditor(withCursor(editor, provider.awareness))
+      setUserCursorReady(true)
+    } else {
+      console.warn("no editor yet?? Shouldn't happen")
+    }
 
-    // // Listen for new connections to peers
-    // node?.connectionManager.on('peer:connect', (connection) => {
-    //   console.log(`Connected to ${connection.remotePeer.toB58String()}`)
-    // })
+  }, [prevProvider, provider, editor, setEditor])
 
-    // // Listen for peers disconnecting
-    // node?.connectionManager.on('peer:disconnect', (connection) => {
-    //   console.log(`Disconnected from ${connection.remotePeer.toB58String()}`)
-    // });
 
-    (async () => {
-      console.log("Started libp2p", node?.multiaddrs)
-    })().catch(e => {
-      console.error("Failed to start libp2p", e)
-    })
+  // Update our nickname whenever it changes
+  React.useEffect(() => {
+    if (provider) {
+      provider.awareness.setLocalState({
+        alphaColor: color.slice(0, -2) + "0.2)",
+        color,
+        name: nickName,
+      });
+    }
 
-  }, [node, prevNode])
+  }, [nickName, provider])
 
+  // Hack – we need to wait until we have an awareness object before using this, but we can't conditionally call hooks
   // @ts-ignore
-  const { decorate, cursors } = useCursors(editor || { awareness: { on: () => { } } })
+  const { decorate, cursors } = useCursors((userCursorReady && editor && editor.awareness) ? editor : { awareness: { on: () => { } } })
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [
     decorate,
   ]);
-
-  const [targetAddr, setTargetAddr] = React.useState("")
-
   const decorateWrapper = useCallback((...args: any) =>
     // @ts-ignore
     [
@@ -229,21 +206,22 @@ const MarkdownShortcutsExample = () => {
 
   return (
     <div>
-      <div>Your addresses:</div>
-      {node?.multiaddrs?.map(ma => <div key={ma.toString()}>{`${ma.toString()}/p2p/${node?.peerId.toB58String()}`}</div>)}
-      <div>Connect to multiaddr:</div>
+      {node && <div>Your PeerID: {node?.peerId.toB58String()}</div>}
+      {node && <div>Room: <a target={'_blank'} href={formLinkToShare(node.peerId, node.multiaddrs.map(ma => ma.toString()) || [], room)}>{room}</a></div>}
+      {node && <div>Nickname:
+        <input type="text" style={{ border: "solid 1px" }} value={nickName} onChange={e => setNickName(e.target.value)} />
+      </div>}
+      <br />
+      <div>Join/create another room:</div>
       <div>
-        <input type="text" style={{ border: "solid 1px" }} value={targetAddr} onChange={e => setTargetAddr(e.target.value)} />
+        <input type="text" style={{ border: "solid 1px", marginRight: "8px" }} value={otherRoom} onChange={e => setOtherRoom(e.target.value)} />
         <button onClick={async () => {
-          await node?.dial(targetAddr)
-          console.log("dialed", targetAddr)
-        }}>Connect</button>
+          window.open(linkToNewRoom(otherRoom))
+        }}>Join (new window)</button>
       </div>
+      <br />
       {cursors.length > 0 && <div>Peers connected:</div>}
       <span>{cursors.map(({ data }: any) => <pre key={data.name} style={{ color: data.color }}>{data.name}</pre>)}</span>
-
-
-      {/* <Slate editor={editor} value={value} onChange={value => setValue(value)}> */}
       {!editor && <div>Loading editor...</div>}
       {!!editor && <Slate editor={editor} value={value} onChange={value => setValue(value)}>
         <div style={{ border: "solid 1px", marginTop: 8, padding: 8 }}>
@@ -261,101 +239,7 @@ const MarkdownShortcutsExample = () => {
   )
 }
 
-const withShortcuts = (editor: any) => {
-  const { deleteBackward, insertText } = editor
-
-  editor.insertText = (text: any) => {
-    const { selection } = editor
-
-    if (text === ' ' && selection && Range.isCollapsed(selection)) {
-      const { anchor } = selection
-      const block = Editor.above(editor, {
-        match: n => Editor.isBlock(editor, n),
-      })
-      const path = block ? block[1] : []
-      const start = Editor.start(editor, path)
-      const range = { anchor, focus: start }
-      const beforeText = Editor.string(editor, range)
-      // @ts-ignore
-      const type = SHORTCUTS[beforeText]
-
-      if (type) {
-        Transforms.select(editor, range)
-        Transforms.delete(editor)
-        const newProperties: Partial<SlateElement> = {
-          // @ts-ignore
-          type,
-        }
-        Transforms.setNodes<SlateElement>(editor, newProperties, {
-          match: n => Editor.isBlock(editor, n),
-        })
-
-        if (type === 'list-item') {
-          // const list: BulletedListElement = {
-          const list: any = {
-            type: 'bulleted-list',
-            children: [],
-          }
-          Transforms.wrapNodes(editor, list, {
-            match: n =>
-              !Editor.isEditor(n) &&
-              SlateElement.isElement(n) &&
-              n.type === 'list-item',
-          })
-        }
-
-        return
-      }
-    }
-
-    insertText(text)
-  }
-
-  editor.deleteBackward = (...args) => {
-    const { selection } = editor
-
-    if (selection && Range.isCollapsed(selection)) {
-      const match = Editor.above(editor, {
-        match: n => Editor.isBlock(editor, n),
-      })
-
-      if (match) {
-        const [block, path] = match
-        const start = Editor.start(editor, path)
-
-        if (
-          !Editor.isEditor(block) &&
-          SlateElement.isElement(block) &&
-          block.type !== 'paragraph' &&
-          Point.equals(selection.anchor, start)
-        ) {
-          const newProperties: Partial<SlateElement> = {
-            type: 'paragraph',
-          }
-          Transforms.setNodes(editor, newProperties)
-
-          if (block.type === 'list-item') {
-            Transforms.unwrapNodes(editor, {
-              match: n =>
-                !Editor.isEditor(n) &&
-                SlateElement.isElement(n) &&
-                n.type === 'bulleted-list',
-              split: true,
-            })
-          }
-
-          return
-        }
-      }
-
-      deleteBackward(...args)
-    }
-  }
-
-  return editor
-}
-
-const Element = ({ attributes, children, element }) => {
+const Element = ({ attributes, children, element, ...rest }: any) => {
   switch (element.type) {
     case 'block-quote':
       return <blockquote {...attributes}>{children}</blockquote>
@@ -380,45 +264,13 @@ const Element = ({ attributes, children, element }) => {
   }
 }
 
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text:
-          'The editor gives you full control over the logic you can add. For example, it\'s fairly common to want to add markdown-like shortcuts to editors. So that, when you start a line with "> " you get a blockquote that looks like this:',
-      },
-    ],
-  },
-  {
-    type: 'block-quote',
-    children: [{ text: 'A wise quote.' }],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text:
-          'Order when you start a line with "## " you get a level-two heading, like this:',
-      },
-    ],
-  },
-  {
-    type: 'heading-two',
-    children: [{ text: 'Try it out!' }],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text:
-          'Try it out for yourself! Try starting a new line with ">", "-", or "#"s.',
-      },
-    ],
-  },
-]
+const initialValue: Descendant[] = [{ type: "paragraph", children: [{ text: "" }] },]
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
+  if (leaf.placeholder) {
+    return <span {...attributes}>{children}</span>
+  }
+
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
@@ -491,55 +343,7 @@ const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
   );
 };
 
-const Leaf2 = ({ attributes, children, leaf }: any) => {
-  return (
-    <span
-      {...attributes}
-      className={css`
-        font-weight: ${leaf.bold && 'bold'};
-        font-style: ${leaf.italic && 'italic'};
-        text-decoration: ${leaf.underlined && 'underline'};
-        ${leaf.title &&
-        css`
-            display: inline-block;
-            font-weight: bold;
-            font-size: 20px;
-            margin: 20px 0 10px 0;
-          `}
-        ${leaf.list &&
-        css`
-            padding-left: 10px;
-            font-size: 20px;
-            line-height: 10px;
-          `}
-        ${leaf.hr &&
-        css`
-            display: block;
-            text-align: center;
-            border-bottom: 2px solid #ddd;
-          `}
-        ${leaf.blockquote &&
-        css`
-            display: inline-block;
-            border-left: 2px solid #ddd;
-            padding-left: 10px;
-            color: #aaa;
-            font-style: italic;
-          `}
-        ${leaf.code &&
-        css`
-            font-family: monospace;
-            background-color: #eee;
-            padding: 3px;
-          `}
-      `}
-    >
-      {children}
-    </span>
-  )
-}
-
-function decorateMarkdown([node, path]: any) {
+function decorateMarkdown([node, path]: any): any {
   const ranges = []
 
   if (!Text.isText(node)) {
@@ -556,6 +360,7 @@ function decorateMarkdown([node, path]: any) {
     }
   }
 
+  // console.log("Here", node.text)
   const tokens = Prism.tokenize(node.text, Prism.languages.markdown)
   let start = 0
 
@@ -577,4 +382,44 @@ function decorateMarkdown([node, path]: any) {
   return ranges
 }
 
-export default MarkdownShortcutsExample
+function useConnectToMultiAddrs(node: null | Libp2p, targetMultiAddrs: string[]) {
+  React.useEffect(() => {
+    let earlyCancel = false;
+
+    (async () => {
+      const retry = 3
+      for (let i = 0; i < retry; i++) {
+        for (const multiAddr of targetMultiAddrs) {
+          if (earlyCancel) {
+            return
+          }
+          try {
+            await node?.dial(multiAddr)
+          } catch (e) {
+            console.log("Failed to dial target", e)
+            await new Promise(resolve => setTimeout(resolve, 500))
+            continue
+          }
+
+          return
+        }
+      }
+    })();
+
+    return () => {
+      earlyCancel = true
+    }
+  }, [targetMultiAddrs])
+}
+
+function formLinkToShare(peerId: PeerId, multiaddrs: string[], room: string) {
+  return `/?${targetMultiAddrsParam}=${JSON.stringify(multiaddrs.map(ma => `${ma}/p2p/${peerId.toB58String()}`))}&${roomParam}=${room}`
+}
+
+function linkToNewRoom(room: string) {
+  return `/?${roomParam}=${room}`
+}
+
+
+
+export default CollabEditor
