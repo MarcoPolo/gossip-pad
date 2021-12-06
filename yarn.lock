@@ -5729,7 +5729,7 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lib0@^0.2.35, lib0@^0.2.42, lib0@^0.2.43:
+lib0@^0.2.42, lib0@^0.2.43:
   version "0.2.43"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.43.tgz#1c2ed1fb2e9fe136e92abef7ca56875f2ee66b07"
   integrity sha512-MJ1KLoz5p3gljIUBfdjjNuL/wlWHHK6+DrcIRhzSRLvtAu1XNdRtRGATYM51KSTI0P2nxJZFQM8rwCH6ga9KUw==
@@ -8831,15 +8831,10 @@ xxhash-wasm@^0.4.1:
   resolved "https://registry.yarnpkg.com/xxhash-wasm/-/xxhash-wasm-0.4.2.tgz#752398c131a4dd407b5132ba62ad372029be6f79"
   integrity sha512-/eyHVRJQCirEkSZ1agRSCwriMhwlyUcFkXD5TPVSLP+IPzjsqMVzZwdoczLp1SoQU0R3dxz1RpIK+4YNQbCVOA==
 
-y-indexeddb@^9.0.6:
-  version "9.0.6"
-  resolved "https://registry.yarnpkg.com/y-indexeddb/-/y-indexeddb-9.0.6.tgz#49aecac11bc229571fb134e0ec0717c0330b731f"
-  integrity sha512-8mdCYdzZDWS2lGiB9Reaz67ZqvnV6EXH/F7L+TmBC+3mWjIBrPw4UcI79nOhEOh+y9lHXzNpSda4YJ06M13F1A==
-  dependencies:
-    lib0 "^0.2.35"
-
-"y-libp2p@file:../y-libp2p":
-  version "0.0.1"
+y-libp2p@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/y-libp2p/-/y-libp2p-0.0.2.tgz#9c927442ac2edb9000de60ed5e3c6f51f5ac8862"
+  integrity sha512-ypZC/tBk4kWWhp0zLKjneWeM+lIO3CZCS+JCwPj0GtD5T/M9MVT5CAnbckMxuJpL2e3cJ0dsUXGZvaekfbtuDw==
   dependencies:
     peer-id ">=0.16.0"
     y-protocols "^1.0.x"

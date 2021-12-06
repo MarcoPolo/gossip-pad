@@ -35,7 +35,7 @@
     "slate": "^0.71.0",
     "slate-react": "^0.71.0",
     "slate-yjs": "^3.2.0",
-    "y-libp2p": "file:../y-libp2p",
+    "y-libp2p": "0.0.2",
     "yaml": "^1.10.2",
     "yjs": "^13.5.22"
   },
