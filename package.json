@@ -40,8 +40,8 @@
     "yjs": "^13.5.22"
   },
   "scripts": {
-    "dev": "parcel serve wwwP/index.html --open",
-    "build": "parcel build --dist-dir dist wwwP/index.html",
+    "dev": "parcel serve www/index.html --open",
+    "build": "parcel build --dist-dir dist www/index.html",
     "publish": "ipfs add -r dist"
   }
 }

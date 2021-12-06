@@ -70,7 +70,6 @@ function useLibp2p({ peerId }: { peerId: PeerId | null }) {
     node?.stop()
 
     firstPass.current = false
-    console.log("peers are different", peerId, prevPeerId)
 
     let hoistedNode: Libp2p | null = null
     libp2p({ peerId }).then(async (p2pNode) => {
@@ -104,7 +103,6 @@ const CollabEditor = () => {
     const editor = withReact(createEditor() as any)
     const sharedType = yDoc.getArray<SyncElement>('content');
     const yjsEditor = withYjs(editor, sharedType);
-    console.log("shared", sharedType.toJSON())
     toSharedType(sharedType, [
       // @ts-ignore
       { type: "paragraph", children: [{ text: "" }] },
@@ -148,7 +146,6 @@ const CollabEditor = () => {
 
       const provider = new Provider(yDoc, node, room);
 
-      console.log("setup provider", provider)
       provider.awareness.setLocalState({
         alphaColor: color.slice(0, -2) + "0.2)",
         color,
@@ -360,7 +357,6 @@ function decorateMarkdown([node, path]: any): any {
     }
   }
 
-  // console.log("Here", node.text)
   const tokens = Prism.tokenize(node.text, Prism.languages.markdown)
   let start = 0
 
