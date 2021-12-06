@@ -3,7 +3,7 @@
 A p2p collaborative markdown editor. See it running here:
 [https://gossippad-marcopolo-io.ipns.dweb.link/](https://gossippad-marcopolo-io.ipns.dweb.link/)
 
-It uses [Yjs], [Slatejs], and [libp2p]
+It uses [Yjs], [Slatejs], and [libp2p]. Uses [y-libp2p] As a Yjs provider.
 
 
 ## Dev
@@ -15,4 +15,5 @@ will setup your environment.
 
 [Yjs]: https://github.com/yjs/yjs
 [Slatejs]: https://slatejs.org/
-[libp2p] https://libp2p.io/
+[libp2p]: https://libp2p.io/
+[y-libp2p]: https://github.com/marcopolo/y-libp2p
