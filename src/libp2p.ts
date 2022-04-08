@@ -21,7 +21,7 @@ export default async function p2p({ peerId }: { peerId: PeerId | null }): Promis
       // libp2p will automatically attempt to dial to the signaling server so that it can
       // receive inbound connections from other peers
       listen: [
-        '/dns4/rusty.marcopolo.io/tcp/443/wss/p2p-webrtc-star/',
+        // '/dns4/rusty.marcopolo.io/tcp/443/wss/p2p-webrtc-star/',
         '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
         '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
       ]
