@@ -1,6 +1,6 @@
 # GossipPad
 
-A p2p collaborative markdown editor. See it running here:
+A p2p collaborative markdown editor. See it running here: [gp.marcopolo.io](https://gp.marcopolo.io) or
 [https://gossippad-marcopolo-io.ipns.dweb.link/](https://gossippad-marcopolo-io.ipns.dweb.link/)
 
 It uses [Yjs], [Slatejs], and [libp2p]. Uses [y-libp2p] As a Yjs provider.
